@@ -4,6 +4,7 @@ import           Control.Applicative  ((<$>))
 import           Control.Monad        (forever, mzero)
 import           Data.Aeson            as A
 import           Network.HTTP.Simple
+import qualified Network.URI as Uri
 import Data.Maybe(fromJust,fromMaybe)
 import qualified Data.ByteString.Lazy as LBS
 
@@ -29,9 +30,19 @@ getJson=do
 decodeJson::LBS.ByteString->Maybe [ChromeTab]
 decodeJson lbs = A.decode lbs :: Maybe [ChromeTab]
 
+parseUri :: String -> String
+parseUri uri = fromMaybe (error "parseUri: Invalid URI") $ do
+     u    <- Uri.parseURI uri
+     return (Uri.uriPath u)
+
+
 getWSDebugUrl=do
                 json<-getJson
                 let tabs=decodeJson json
                 let firstTab=(head $ fromJust tabs)
                 return $ webSocketDebuggerUrl firstTab
 
+
+getWSDebugPath=do
+               url<-getWSDebugUrl
+               return (parseUri url)
