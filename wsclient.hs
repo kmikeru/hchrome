@@ -7,14 +7,18 @@ import           Data.Text           (Text)
 import qualified Data.Text           as T
 import qualified Data.Text.IO        as T
 import qualified Network.WebSockets  as WS
+import qualified Data.Aeson as A
 import ChromeTabs
+import ChromeCommand
 
-line="{\"id\":1,\"method\": \"Page.navigate\", \"params\": {\"url\": \"http://google.com\"}}"
---------------------------------------------------------------------------------
 app :: WS.ClientApp ()
 app conn = do
     putStrLn "Connected!"
-    WS.sendTextData conn (T.pack line)
+    WS.sendTextData conn $ A.encode $ ChromeCommand {
+	commandId=1,
+	commandMethod="Page.navigate",
+	commandParams=[("url","http://ya.ru")]
+    }
     msg <- WS.receiveData conn
     liftIO $ T.putStrLn msg
     WS.sendClose conn ("Bye!" :: Text)
