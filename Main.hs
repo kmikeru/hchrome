@@ -2,6 +2,7 @@
 module Main  ( main ) where
 
 import           Control.Monad.Trans (liftIO)
+import Control.Concurrent.Thread.Delay
 import           Network.Socket      (withSocketsDo)
 import           Data.Text           (Text)
 import qualified Data.Text           as T
@@ -11,16 +12,24 @@ import qualified Data.Aeson as A
 import ChromeTabs
 import ChromeCommand
 
+command1=ChromeCommand { commandId=1, commandMethod="Page.navigate",commandParams=[("url","http://ngs.ru")] }
+command2=ChromeCommand { commandId=2, commandMethod="Page.navigate",commandParams=[("url","http://ya.ru")] }
+commands=[command1,command2]
+encCommands=map (A.encode) commands
+
+
+sendCommandWithWait conn comm = do
+    putStrLn "Sending!"
+    WS.sendTextData conn (A.encode comm)
+    putStrLn "Sent, receiving"
+    msg <- WS.receiveData conn
+    putStrLn $ "Received:"++T.unpack(msg)
+    delay 3000000
+
 app :: WS.ClientApp ()
 app conn = do
     putStrLn "Connected!"
-    WS.sendTextData conn $ A.encode $ ChromeCommand {
-	commandId=1,
-	commandMethod="Page.navigate",
-	commandParams=[("url","http://ya.ru")]
-    }
-    msg <- WS.receiveData conn
-    liftIO $ T.putStrLn msg
+    mapM (sendCommandWithWait conn) commands
     WS.sendClose conn ("Bye!" :: Text)
 
 
