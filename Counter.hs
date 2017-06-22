@@ -1,4 +1,4 @@
-module Count where
+module Counter where
 import Data.IORef
 
 
