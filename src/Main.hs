@@ -13,11 +13,10 @@ import ChromeTabs
 import ChromeCommand
 import Counter
 
+command0=ChromeCommand { commandId=0, commandMethod="Page.enable",commandParams=[]}
 command1=ChromeCommand { commandId=0, commandMethod="Page.navigate",commandParams=[("url","http://ngs.ru")] }
 command2=ChromeCommand { commandId=0, commandMethod="Page.navigate",commandParams=[("url","http://ya.ru")] }
-commands=[command1,command2]
-encCommands=map (A.encode) commands
-
+commands=[command0,command1]
 
 sendCommandWithWait conn cnt comm= do
     putStrLn "Sending!"
@@ -29,7 +28,7 @@ sendCommandWithWait conn cnt comm= do
     putStrLn "Sent, receiving"
     msg <- WS.receiveData conn
     putStrLn $ "Received:"++T.unpack(msg)
-    delay 3000000
+    delay 5000000
 
 app :: WS.ClientApp ()
 app conn = do

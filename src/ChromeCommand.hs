@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module ChromeCommand where
 import Data.Aeson
 import qualified Data.Map   as M
